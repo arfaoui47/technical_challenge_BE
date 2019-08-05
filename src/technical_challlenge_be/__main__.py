@@ -11,9 +11,10 @@ import technical_challlenge_be
 
 # To enable pretty tracebacks:
 #   echo "export ENABLE_BACKTRACE=1;" >> ~/.bashrc
-if os.environ.get('ENABLE_BACKTRACE') == "1":
+if os.environ.get('ENABLE_BACKTRACE') == '1':
     try:
         import backtrace
+
         backtrace.hook(align=True, strip_path=True, enable_on_envvar_only=True)
     except ImportError:
         # don't fail just because of missing dev library

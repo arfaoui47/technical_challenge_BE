@@ -8,3 +8,7 @@
 # should see if there is a conda package that suits your needs.
 
 click
+Django
+djangorestframework
+django-rest-swagger
+unittest-xml-reporting
