@@ -62,3 +62,26 @@ Code Quality/CI:
 [pyversions_img]: https://img.shields.io/pypi/pyversions/technical-challlenge-be.svg
 [pyversions_ref]: https://pypi.python.org/pypi/technical-challlenge-be
 
+install env:
+```shell script
+make install
+```
+
+activate env:
+```shell script
+source activate
+```
+
+prepare db:
+```shell script
+python src/technical_challlenge_be/catalog_app/manage.py makemigrations
+python src/technical_challlenge_be/catalog_app/manage.py migrate
+```
+
+run dev server:
+```shell script
+python src/technical_challlenge_be/catalog_app/manage.py runserver PORT
+```
+
+API Endpoints are documented using swagger under:
+localhost:PORT/api/v1/swagger/
