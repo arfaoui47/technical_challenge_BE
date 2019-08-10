@@ -1,6 +1,6 @@
-from .models import Book, VocabularyCatalogue, Word
-
-from rest_framework import serializers, viewsets, status
+from .models import Book              , VocabularyCatalogue, Word
+from rest_framework import serializers, viewsets           , status
+from rest_framework.response import Response
 
 
 class BookSerializer(serializers.HyperlinkedModelSerializer):
@@ -8,25 +8,49 @@ class BookSerializer(serializers.HyperlinkedModelSerializer):
         model  = Book
         fields = "__all__"
 
-    def create(self, validated_data):
-        self.save_worlds(validated_data)
-        return Book(**validated_data)
+    @staticmethod
+    def save_worlds(data, context):
+        request         = context['request']
+        max_word_length = request.query_params.get('max_length')
 
-    def save_worlds(self, data):
-        def filtered(word, filter):
-            return False
+        def max_word_length_filter(w, max_length):
+            if isinstance(max_length, str):
+                try:
+                    max_length = int(max_length)
+                except Exception as ext:
+                    # todo handle exception
+                    print(ext)
+                    return True
+
+            if not max_length:
+                return True
+            return len(w) >= max_length
 
         if 'content' in data:
             content = data['content']
             words   = content.split()
             for word in words:
-                if not filtered(word, filter):
+                if max_word_length_filter(word, max_word_length):
                     Word.objects.create(value=word, vocabulary=data['vocabulary'])
+
+    def create(self, validated_data):
+        self.save_worlds(validated_data, context=self.context)
+        return Book(**validated_data)
 
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset         = Book.objects.all()
     serializer_class = BookSerializer
+
+    def create(self, request, *args, **kwargs):
+        data             = request.data
+        write_serializer = BookSerializer(data=data, context={'request': request})
+        write_serializer.is_valid(raise_exception=True)
+        instance = self.perform_create(write_serializer)
+
+        read_serializer = BookSerializer(instance)
+
+        return Response(read_serializer.data)
 
 
 class CatalogueSerializer(serializers.HyperlinkedModelSerializer):
