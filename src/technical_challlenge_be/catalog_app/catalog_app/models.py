@@ -21,7 +21,7 @@ class Book(models.Model):
     content          = models.TextField()
     isbn             = models.CharField(max_length=256, null=True)
     publication_date = models.DateTimeField(null=True)
-
+    min_word_size    = models.IntegerField()
 
 class Word(models.Model):
     word_id       = models.AutoField(primary_key=True)

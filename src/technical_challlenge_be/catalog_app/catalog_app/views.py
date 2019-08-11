@@ -11,30 +11,34 @@ class BookSerializer(serializers.HyperlinkedModelSerializer):
     @staticmethod
     def save_worlds(data, context):
         request         = context['request']
-        max_word_length = request.query_params.get('max_length')
+        min_word_size_arg = request.data.get('min_word_size')
 
-        def max_word_length_filter(w, max_length):
-            if isinstance(max_length, str):
+        def min_word_length_filter(w, min_length):
+            if isinstance(min_length, str):
                 try:
-                    max_length = int(max_length)
+                    min_length = int(min_length)
                 except Exception as ext:
                     # todo handle exception
                     print(ext)
                     return True
 
-            if not max_length:
+            if not min_length:
                 return True
-            return len(w) >= max_length
+            return len(w) >= min_length
 
         if 'content' in data:
             content = data['content']
             words   = content.split()
             for word in words:
-                if max_word_length_filter(word, max_word_length):
+                if min_word_length_filter(word, min_word_size_arg):
                     Word.objects.create(value=word, vocabulary=data['vocabulary'])
 
     def create(self, validated_data):
         self.save_worlds(validated_data, context=self.context)
+        return Book(**validated_data)
+
+    def update(self, validated_data):
+        # print(validated_data)
         return Book(**validated_data)
 
 
@@ -47,10 +51,11 @@ class BookViewSet(viewsets.ModelViewSet):
         write_serializer = BookSerializer(data=data, context={'request': request})
         write_serializer.is_valid(raise_exception=True)
         instance = self.perform_create(write_serializer)
-
         read_serializer = BookSerializer(instance)
-
         return Response(read_serializer.data)
+
+    # def update(self, request, *args, **kwargs):
+    #   data = request.data
 
 
 class CatalogueSerializer(serializers.HyperlinkedModelSerializer):
